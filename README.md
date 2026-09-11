@@ -1,18 +1,38 @@
-# WAN Network Project with ACLs
+# Secure Multi-Site WAN Network with ACLs
 
 ## Project Overview
 
-This document describes the project for interconnecting the local area networks (LANs) of the São Paulo, Rio de Janeiro, and Vitória branches through a WAN.
+This project was developed in **Cisco Packet Tracer** as an academic network simulation focused on WAN connectivity, routing, network services, wireless access, and access-control policies.
 
-The architecture was designed in a linear topology using Cisco routers and corporate switches, providing dynamic IP address assignment through DHCP and centralized name resolution through DNS.
+The topology interconnects the local area networks (LANs) of three branches located in **São Paulo, Rio de Janeiro, and Vitória** through a WAN.
+
+The architecture uses Cisco routers, switches, access points, local servers, DHCP services, centralized DNS, RIPv2 dynamic routing, and Access Control Lists (ACLs).
+
 ---
 
+## Technologies and Concepts Used
+
+- Cisco Packet Tracer
+- Cisco 2911 Routers
+- Cisco 2950-24 Switches
+- WAN and LAN networking
+- Wireless LAN (WLAN)
+- DHCP
+- DNS
+- RIPv2
+- Standard ACLs
+- Extended ACLs
+- Telnet / VTY remote administration
+- Layer 3 traffic filtering
+- Network segmentation
+- HTTP access control
+
+---
 
 ## Components and Equipment Used
 
-The physical infrastructure simulated in Cisco Packet Tracer is composed of the following devices at each location:
-
 ### São Paulo
+
 - 01 Cisco 2911 Router (`Router SP`)
 - 01 Cisco 2950-24 Switch (`Switch2`)
 - 01 Generic Access Point (`Access Point Sao`)
@@ -21,6 +41,7 @@ The physical infrastructure simulated in Cisco Packet Tracer is composed of the 
 - 01 Network Printer (`Printer0`)
 
 ### Rio de Janeiro
+
 - 01 Cisco 2911 Router (`Router RIO`)
 - 01 Cisco 2950-24 Switch (`Switch1`)
 - 01 Generic Access Point (`Access Point RIO`)
@@ -29,6 +50,7 @@ The physical infrastructure simulated in Cisco Packet Tracer is composed of the 
 - 01 Wireless Laptop (`Laptop0`)
 
 ### Vitória
+
 - 01 Cisco 2911 Router (`Router Vitoria`)
 - 01 Cisco 2950-24 Switch (`Switch3`)
 - 01 Generic Access Point (`Access Point Vitoria`)
@@ -38,123 +60,250 @@ The physical infrastructure simulated in Cisco Packet Tracer is composed of the 
 
 ---
 
-## IP Addressing Plan and Interfaces
+## IP Addressing Plan
 
-| Device / Link | Interface | IP Address | Subnet Mask | Default Gateway | Function / Notes |
+| Device / Link | Interface | IP Address | Subnet Mask | Default Gateway | Function |
 |---|---|---:|---|---|---|
-| WAN Link SP-RIO | Gig0/0 (SP) | 10.0.0.1 | 255.0.0.0 (/8) | N/A | Direct communication between SP and RIO |
-| WAN Link SP-RIO | Gig0/0 (RIO) | 10.0.0.2 | 255.0.0.0 (/8) | N/A | Direct communication between SP and RIO |
-| WAN Link RIO-VIT | Gig0/1 (RIO) | 20.0.0.1 | 255.0.0.0 (/8) | N/A | Direct communication between RIO and Vitória |
-| WAN Link RIO-VIT | Gig0/0 (VIT) | 20.0.0.2 | 255.0.0.0 (/8) | N/A | Direct communication between RIO and Vitória |
+| WAN SP-RIO | Gig0/0 (SP) | 10.0.0.1 | 255.0.0.0 (/8) | N/A | SP-RIO WAN link |
+| WAN SP-RIO | Gig0/0 (RIO) | 10.0.0.2 | 255.0.0.0 (/8) | N/A | SP-RIO WAN link |
+| WAN RIO-VIT | Gig0/1 (RIO) | 20.0.0.1 | 255.0.0.0 (/8) | N/A | RIO-VIT WAN link |
+| WAN RIO-VIT | Gig0/0 (VIT) | 20.0.0.2 | 255.0.0.0 (/8) | N/A | RIO-VIT WAN link |
 | SP Gateway | Gig0/1 | 192.168.1.1 | 255.255.255.0 (/24) | N/A | São Paulo LAN gateway |
-| SP Server | Fa0 | 192.168.1.2 | 255.255.255.0 (/24) | 192.168.1.1 | Local Web Server (`sao.com`) |
+| SP Server | Fa0 | 192.168.1.2 | 255.255.255.0 (/24) | 192.168.1.1 | Web server (`sao.com`) |
 | RIO Gateway | Gig0/2 | 192.168.2.1 | 255.255.255.0 (/24) | N/A | Rio de Janeiro LAN gateway |
-| RIO Server | Fa0 | 192.168.2.2 | 255.255.255.0 (/24) | 192.168.2.1 | Web Server and Master DNS (`rio.com`) |
+| RIO Server | Fa0 | 192.168.2.2 | 255.255.255.0 (/24) | 192.168.2.1 | Web server and master DNS (`rio.com`) |
 | VIT Gateway | Gig0/1 | 192.168.3.1 | 255.255.255.0 (/24) | N/A | Vitória LAN gateway |
-| VIT Server | Fa0 | 192.168.3.2 | 255.255.255.0 (/24) | 192.168.3.1 | Local Web Server (`vitoria.com`) |
-| SP LAN Hosts | DHCP | 192.168.1.11 - 192.168.1.254 | 255.255.255.0 (/24) | 192.168.1.1 | Dynamic IPs (DNS: 192.168.2.2) |
-| RIO LAN Hosts | DHCP | 192.168.2.11 - 192.168.2.254 | 255.255.255.0 (/24) | 192.168.2.1 | Dynamic IPs (DNS: 192.168.2.2) |
-| VIT LAN Hosts | DHCP | 192.168.3.11 - 192.168.3.254 | 255.255.255.0 (/24) | 192.168.3.1 | Dynamic IPs (DNS: 192.168.2.2) |
+| VIT Server | Fa0 | 192.168.3.2 | 255.255.255.0 (/24) | 192.168.3.1 | Web server (`vitoria.com`) |
+
+### DHCP Pools
+
+- São Paulo: `192.168.1.11` - `192.168.1.254`
+- Rio de Janeiro: `192.168.2.11` - `192.168.2.254`
+- Vitória: `192.168.3.11` - `192.168.3.254`
+
+All DHCP clients use the centralized DNS server:
+
+`192.168.2.2`
 
 ---
 
-## Basic and Essential Service Configuration
+## DHCP Configuration
 
-### Dynamic Host Configuration Protocol (DHCP)
+Each branch router acts as a local DHCP server.
 
-To optimize host administration, the Cisco routers at each branch were configured as local DHCP servers.
+The first ten addresses of each subnet are excluded from the DHCP pool using:
 
-To avoid connectivity conflicts with devices using static IP addresses, the first ten addresses of each subnet were explicitly excluded from the automatic allocation pool using the `ip dhcp excluded-address` command.
+```text
+ip dhcp excluded-address
+```
 
-Each DHCP scope automatically distributes the IP address, subnet mask, corresponding gateway, and points clients to the centralized DNS server located in the Rio de Janeiro network (`192.168.2.2`).
+Each DHCP scope automatically provides:
 
-### Centralized Domain Name System (DNS)
+- IP address
+- Subnet mask
+- Default gateway
+- DNS server
 
-The DNS service is centralized on the main server in Rio de Janeiro (`192.168.2.2`).
+The centralized DNS server is located in Rio de Janeiro at:
 
-It statically maps fully qualified domain names (FQDNs) to their respective internal IP addresses:
-
-- `rio.com` → `192.168.2.2`
-- `sao.com` → `192.168.1.2`
-- `vitoria.com` → `192.168.3.2`
-
----
-
-## Wireless Access Layer
-
-Connectivity for mobile devices (laptops) was implemented through access points operating at Layers 1 and 2 of the OSI model.
-
-Following the project requirements, wireless authentication was configured using WEP (Wired Equivalent Privacy) with a static hexadecimal key.
-
-> **Public repository note:** The original lab key was intentionally removed from this README.
-
-The SSIDs were configured individually for each location. Devices connected through the wireless network receive their IP configuration directly from the DHCP service configured on the Cisco routers.
+```text
+192.168.2.2
+```
 
 ---
 
-## Remote Management Service (Telnet VTY)
+## Centralized DNS
 
-To enable centralized remote administration of the infrastructure without requiring physical access to the routers, the Telnet virtual terminal service was enabled on all routers.
+The DNS service is hosted on the Rio de Janeiro server.
 
-The virtual terminal lines (`line vty 0 4`) were configured with password authentication. An additional password was configured to protect privileged EXEC mode.
+The following internal domain names are configured:
 
-> **Public repository note:** The original lab passwords were intentionally removed from this README.
+| Domain | IP Address |
+|---|---:|
+| `rio.com` | `192.168.2.2` |
+| `sao.com` | `192.168.1.2` |
+| `vitoria.com` | `192.168.3.2` |
 
-This setup allows administrators connected through workstations or laptops on the WAN to perform diagnostics and configuration changes remotely through the command line.
+This allows hosts from different branches to access the web servers using domain names instead of IP addresses.
 
 ---
 
-## Security Policies and Access Control Lists (ACLs)
+## Wireless Network
 
-To reduce vulnerabilities and optimize data flow across the WAN interconnecting the three branches, access-control policies were implemented using Layer 3 packet-filtering rules.
+Each branch has its own wireless access point.
 
-The implemented logic separates administrative router traffic and restricts direct communication between specific local networks, handling employees, third-party users, and customers differently.
+The SSIDs are configured separately by location, and wireless devices receive their IP configuration through DHCP.
 
-### Administrative Access Control and Remote Management
+The wireless security configuration uses **WEP**, following the original academic project requirements.
 
-To protect network devices from unauthorized access by regular users, a clear distinction was established between internal employee privileges and the permissions granted to customers or third-party users connected through the wireless network.
+> This project is a simulated academic environment. WEP is a legacy protocol and should not be used in modern production networks.
 
-A standard Access Control List (ACL) was applied to the VTY lines of all routers to restrict Telnet access.
+---
 
-With this policy, customers, suppliers, and third-party service providers connected through Wi-Fi are prevented from initiating remote management sessions or accessing the routers' command-line interface.
+## Remote Management with Telnet
 
-Even if these external users receive valid dynamic IP addresses through DHCP, any attempt to remotely connect to the routers is denied.
+Remote administration was configured using **Telnet over VTY lines** on the Cisco routers.
 
-Remote administrative privileges are restricted exclusively to workstations located in the Rio de Janeiro branch subnet (`192.168.2.0/24`).
+The following configuration concept is used:
 
-This centralizes administrative control of the WAN infrastructure with the internal technical team and reduces the risk of unauthorized monitoring or configuration changes by third parties.
+```text
+line vty 0 4
+password cisco
+login
+```
+
+Privileged EXEC mode is also protected with:
+
+```text
+enable password cisco
+```
+
+### Simulation Credentials
+
+These credentials are used **only inside this Cisco Packet Tracer lab**.
+
+| Purpose | Password |
+|---|---|
+| Telnet / VTY access | `cisco` |
+| Privileged EXEC (`enable`) | `cisco` |
+
+No real-world credentials are stored in this repository.
+
+---
+
+## How to Test Telnet Access
+
+Because the ACL configuration restricts router administration to the **Rio de Janeiro subnet (`192.168.2.0/24`)**, Telnet tests should be performed from an authorized workstation located in the Rio de Janeiro LAN.
+
+For example, from the Command Prompt of an authorized Rio workstation:
+
+```text
+telnet 192.168.1.1
+```
+
+Then enter:
+
+```text
+Password: cisco
+```
+
+To access privileged EXEC mode:
+
+```text
+enable
+```
+
+Then enter:
+
+```text
+Password: cisco
+```
+
+The same process can be used with the other router gateway addresses:
+
+```text
+192.168.2.1
+192.168.3.1
+```
+
+---
+
+## Access Control Lists (ACLs)
+
+The project uses ACLs to implement security policies across the WAN.
+
+The ACL logic has two main objectives:
+
+1. Restrict remote administrative access to network devices.
+2. Control traffic between specific branch networks.
+
+---
+
+## Administrative Access Control
+
+A standard ACL is applied to the VTY lines of the routers.
+
+The purpose is to prevent customers, suppliers, and third-party users connected through Wi-Fi from accessing the routers remotely.
+
+Only devices located in the **Rio de Janeiro subnet (`192.168.2.0/24`)** are authorized to perform remote router administration.
+
+This centralizes network administration and reduces the risk of unauthorized configuration changes.
 
 ---
 
 ## Inter-Branch Traffic Restriction
 
-### Network Segmentation and Security Policy
+An extended ACL is configured on the São Paulo router.
 
-To meet security, departmental isolation, and confidential-data protection requirements, a unidirectional security policy was implemented between Vitória and São Paulo through an extended ACL configured on the São Paulo router (`Router SP`).
+The policy restricts traffic originating from the Vitória network (`192.168.3.0/24`) and destined for the São Paulo network (`192.168.1.0/24`).
 
-The rule was designed around the scenario in which the Vitória branch receives a constant flow of third-party service providers, suppliers, and customers using its facilities and Wi-Fi network.
+General direct access is blocked.
 
-To prevent these external users from gaining visibility into or establishing direct connectivity with local hosts, file servers, or printers inside the São Paulo network (`192.168.1.0/24`), all traffic originating from Vitória and destined for the São Paulo LAN was blocked.
+However, HTTP traffic is explicitly allowed so that users in Vitória can access the São Paulo institutional web server:
 
-However, to support essential business operations and customer/supplier self-service, an explicit exception allows HTTP traffic.
+```text
+sao.com
+192.168.1.2
+```
 
-As a result, external users and employees in Vitória can access the São Paulo institutional web server (`sao.com` - `192.168.1.2`) to consult catalogs and approved corporate systems without exposing São Paulo's private local network.
+This allows access to approved web services without exposing the full São Paulo local network.
 
 ---
 
-## Dynamic Routing Protocol (RIPv2)
+## Dynamic Routing with RIPv2
 
-To provide end-to-end communication between geographically separated networks and allow computers to access servers located in other branches, the RIPv2 dynamic routing protocol was implemented.
+RIPv2 is used to provide dynamic routing between the three branch networks.
 
-The configuration uses the `no auto-summary` command, enabling support for classless networks (VLSM) and ensuring correct routing-table behavior between the WAN `/8` networks (`10.0.0.0` and `20.0.0.0`) and the `/24` LANs (`192.168.X.0`).
+The configuration uses:
 
-With this configuration, routing convergence occurs automatically, allowing hosts throughout the topology to make HTTP requests using domain names and communicate across all three locations.
+```text
+no auto-summary
+```
+
+This allows proper operation with classless networks and supports communication between:
+
+### WAN Networks
+
+```text
+10.0.0.0/8
+20.0.0.0/8
+```
+
+### LAN Networks
+
+```text
+192.168.1.0/24
+192.168.2.0/24
+192.168.3.0/24
+```
+
+With RIPv2 enabled, routes are dynamically exchanged between the routers, allowing hosts from different branches to communicate and access web services using DNS names.
 
 ---
 
 ## Project File
 
-The Cisco Packet Tracer `.pkt` file included in this repository contains the complete simulated topology and configuration used in this project.
+The `.pkt` file included in this repository contains the complete network simulation created in **Cisco Packet Tracer**.
+
+To test the project:
+
+1. Install or open Cisco Packet Tracer.
+2. Open the `.pkt` file from this repository.
+3. Allow the network to converge.
+4. Test communication between hosts using `ping`.
+5. Test DNS resolution and HTTP access.
+6. Test Telnet access from an authorized Rio de Janeiro workstation.
+7. Test the ACL restrictions from other devices and networks.
+
+---
+
+## Security Note
+
+This is an **academic simulation environment**.
+
+Some technologies used in the project, such as **Telnet and WEP**, are legacy protocols and are not recommended for modern production environments.
+
+They were used according to the original project requirements and for educational purposes.
 
 ---
 
