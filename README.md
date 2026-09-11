@@ -5,10 +5,8 @@
 This document describes the project for interconnecting the local area networks (LANs) of the São Paulo, Rio de Janeiro, and Vitória branches through a WAN.
 
 The architecture was designed in a linear topology using Cisco routers and corporate switches, providing dynamic IP address assignment through DHCP and centralized name resolution through DNS.
-
-> **Note:** The original document mentioned redundancy of essential services. This was removed here because the implemented topology does not include actual redundancy.
-
 ---
+
 
 ## Components and Equipment Used
 
